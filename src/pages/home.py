@@ -16,6 +16,9 @@ if "logged_in" not in st.session_state:
 st.title("🏠 Welcome to Home Page")
 st.success(f"Logged in as {st.session_state.user_email}")
 
+if st.button("Build Portfolio"):
+    ui.redirect("pages/build_portfolio")
+
 if st.button("Logout"):
     st.session_state.logged_in = False
     st.session_state.user_email = None
