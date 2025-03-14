@@ -1,7 +1,11 @@
 import streamlit as st
 import yfinance as yf
+
 import pandas as pd
+import numpy as np
+
 from datetime import datetime
+from commons import portfolio
 
 # Load a curated list of Indian stock tickers (NSE/BSE)
 # Source: Predefined CSV (replace with your own URL or local file)
@@ -25,6 +29,9 @@ def load_tickers():
 if 'portfolio' not in st.session_state:
     st.session_state.portfolio = []
 
+if "selected_option" not in st.session_state:
+    st.session_state.selected_option = None
+
 # Function to fetch the last closing price
 def get_last_close_price(ticker):
     try:
@@ -36,6 +43,9 @@ def get_last_close_price(ticker):
             return None
     except:
         return None
+
+def reset_selectbox():
+    st.session_state.selected_option = "" 
 
 # Streamlit app
 st.title("📈 India Stock Portfolio Tracker (NSE/BSE)")
@@ -49,33 +59,39 @@ st.header("Add Stocks to Portfolio")
 selected_ticker_label = st.selectbox(
     "Search for a stock:",
     options=list(ticker_options.values()),
-    index=0,
-    help="Type to search for stocks (e.g., 'Reliance', 'HDFC')"
+    index= None, # 0,
+    help="Type to search for stocks (e.g., 'Reliance', 'HDFC')",
+    key= "selected_option"
 )
+print('Selected Ticker Label: ', selected_ticker_label)
 
-# Extract the ticker from the selected label
-selected_ticker = [ticker for ticker, label in ticker_options.items() if label == selected_ticker_label][0]
+if not selected_ticker_label is None:
+    # Extract the ticker from the selected label
+    selected_ticker = [ticker for ticker, label in ticker_options.items() if label == selected_ticker_label][0]
 
-# Input quantity and add to portfolio
-quantity = st.number_input("Quantity", min_value=1, value=1)
-if st.button("Add Stock to Portfolio"):
-    with st.spinner("Fetching stock data..."):
-        last_close_price = get_last_close_price(selected_ticker)
-        if last_close_price:
-            # Check if ticker already exists in portfolio
-            existing_stock = next((s for s in st.session_state.portfolio if s['ticker'] == selected_ticker), None)
-            if existing_stock:
-                existing_stock['quantity'] += quantity  # Update quantity if exists
+    # Input quantity and add to portfolio
+    quantity = st.number_input("Quantity", min_value=1, value=1)
+    if st.button("Add Stock to Portfolio"):
+        with st.spinner("Fetching stock data..."):
+            last_close_price = get_last_close_price(selected_ticker)
+            if last_close_price:
+                # Check if ticker already exists in portfolio
+                existing_stock = next((s for s in st.session_state.portfolio if s['ticker'] == selected_ticker), None)
+                if existing_stock:
+                    existing_stock['quantity'] += quantity  # Update quantity if exists
+                else:
+                    st.session_state.portfolio.append({
+                        "ticker": selected_ticker,
+                        "quantity": quantity,
+                        "last_close_price": last_close_price,
+                        # "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    })
+                st.success(f"Added {quantity} shares of {ticker_options[selected_ticker]}")
             else:
-                st.session_state.portfolio.append({
-                    "ticker": selected_ticker,
-                    "quantity": quantity,
-                    "last_close_price": last_close_price,
-                    # "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                })
-            st.success(f"Added {quantity} shares of {ticker_options[selected_ticker]}")
-        else:
-            st.error("Failed to fetch data. Check the ticker or try again later.")
+                st.error("Failed to fetch data. Check the ticker or try again later.")
+    
+        # reset_selectbox()
+
 
 # Display and manage portfolio
 st.header("Your Portfolio")
@@ -107,7 +123,12 @@ if st.session_state.portfolio:
                 format="%d"
             ),
             "last_close_price": st.column_config.NumberColumn(
-                "Price (₹)",
+                "Price(₹)",
+                disabled=True,
+                format="₹%.2f"
+            ),
+            "Value": st.column_config.NumberColumn(
+                "Value(₹)",
                 disabled=True,
                 format="₹%.2f"
             )
@@ -136,5 +157,50 @@ if st.session_state.portfolio:
     # Calculate total portfolio value
     total_value = portfolio_df["Value"].sum()
     st.subheader(f"Total Portfolio Value: :green[₹{total_value:,.2f}]")
+
+    ### Simulate Portfolio
+    if st.button("Simulate Portfolio"):
+        stocks = [s + ".NS" for s in portfolio_df["ticker"].values]
+        stock_qty = portfolio_df["quantity"].values
+
+        sim_df = portfolio.simulate_portfolio(stocks, stock_qty)
+
+        stat_df = pd.DataFrame(sim_df.median(axis=1).T) # .astype(int))
+        stat_df.columns = ['Expected Value']
+
+        stat_df['Worst Case (5% chance)'] = sim_df.quantile(0.05, axis=1) #.astype(int)
+        stat_df['Best Case (5% chance)'] = sim_df.quantile(0.95, axis=1) #.astype(int)
+        
+        num_rows = len(stat_df)
+
+        # Date Index
+        date_index = pd.date_range(start=pd.Timestamp.today().date(), periods=num_rows, freq='90D')
+        formatted_index = date_index.strftime("%b-%Y")
+
+        stat_df.index = formatted_index
+
+        st.data_editor(
+            stat_df,
+            column_config= {
+                "Expected Value": st.column_config.NumberColumn(
+                "Expected Value(₹)",
+                disabled=True,
+                format="₹%.2f"),
+                "Worst Case (5% chance)": st.column_config.NumberColumn(
+                "Worst Case (5% chance)",
+                disabled=True,
+                format="₹%.2f"),
+                "Best Case (5% chance)": st.column_config.NumberColumn(
+                "Best Case (5% chance)",
+                disabled=True,
+                format="₹%.2f")
+            }
+        )
+
+        # Display Simulation Chart
+        sim_df.index = formatted_index
+
+        st.pyplot(portfolio.plot_mc_gbm(sim_df))
+
 else:
     st.info("No stocks in your portfolio. Add stocks above.")
