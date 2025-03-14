@@ -59,7 +59,8 @@ def load_tickers():
     try:
         df = pd.read_csv(TICKERS_CSV_URL)
         return df[['SYMBOL', 'NAME OF COMPANY']].values.tolist()  # Format: [[TICKER.NS, Name], ...]
-    except:
+    except Exception as e:
+        logger.error(e)
         return [
             ['RELIANCE', 'Reliance Industries (NSE)'],
             ['TCS', 'Tata Consultancy Services (NSE)'],
