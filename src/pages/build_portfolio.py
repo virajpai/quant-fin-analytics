@@ -5,8 +5,10 @@ import pandas as pd
 import numpy as np
 
 from datetime import datetime
+
 from commons import portfolio
 from commons.nse_symbols import data
+from commons.utils import UiUtils as ui
 
 import logging
 import sys
@@ -52,7 +54,9 @@ def print_tree(directory, prefix=""):
 
 # Load a curated list of Indian stock tickers (NSE/BSE)
 # Source: Predefined CSV (replace with your own URL or local file)
-TICKERS_CSV_URL = 'pages/EQUITY_L.csv' # "static/data/EQUITY_L.csv"
+# TICKERS_CSV_URL = 'pages/EQUITY_L.csv' # "static/data/EQUITY_L.csv"
+
+ui.hide_nav()
 
 @st.cache_data
 def load_tickers():
