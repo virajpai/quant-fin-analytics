@@ -19,9 +19,9 @@ def load_tickers():
         return df[['SYMBOL', 'NAME OF COMPANY']].values.tolist()  # Format: [[TICKER.NS, Name], ...]
     except:
         return [
-            ['RELIANCE.NS', 'Reliance Industries (NSE)'],
-            ['TCS.NS', 'Tata Consultancy Services (NSE)'],
-            ['HDFCBANK.BO', 'HDFC Bank (BSE)'],
+            ['RELIANCE', 'Reliance Industries (NSE)'],
+            ['TCS', 'Tata Consultancy Services (NSE)'],
+            ['HDFCBANK', 'HDFC Bank (NSE)'],
             # Add more tickers if CSV fails to load
         ]
 
@@ -42,6 +42,7 @@ def get_last_close_price(ticker):
         else:
             return None
     except:
+        print(e)
         return None
 
 def reset_selectbox():
