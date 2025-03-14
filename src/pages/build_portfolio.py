@@ -51,7 +51,7 @@ print_tree(os.getcwd())
 
 # Load a curated list of Indian stock tickers (NSE/BSE)
 # Source: Predefined CSV (replace with your own URL or local file)
-TICKERS_CSV_URL = "static/data/EQUITY_L.csv"
+TICKERS_CSV_URL = 'pages/EQUITY_L.csv' # "static/data/EQUITY_L.csv"
 
 @st.cache_data
 def load_tickers():
