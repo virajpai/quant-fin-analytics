@@ -29,6 +29,25 @@ logger.addHandler(file_handler)
 logger.addHandler(stdout_handler)
 logger.info(f'CWD: {os.getcwd()}')
 ################################################################################
+def print_tree(directory, prefix=""):
+    """ Recursively prints the directory tree starting from the given directory """
+    items = sorted(os.listdir(directory))  # Sort for consistent ordering
+    num_items = len(items)
+
+    for index, item in enumerate(items):
+        path = os.path.join(directory, item)
+        is_last = index == num_items - 1  # Check if last item in directory
+        connector = "└── " if is_last else "├── "
+        
+        logger.info(f"{prefix} + {connector} + {item}")
+
+        if os.path.isdir(path):  # If item is a directory, recurse
+            new_prefix = prefix + ("    " if is_last else "│   ")  # Adjust prefix
+            print_tree(path, new_prefix)
+
+print_tree(os.getcwd())
+
+################################################################################
 
 # Load a curated list of Indian stock tickers (NSE/BSE)
 # Source: Predefined CSV (replace with your own URL or local file)
