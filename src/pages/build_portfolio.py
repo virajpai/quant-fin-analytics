@@ -8,6 +8,7 @@ from datetime import datetime
 from commons import portfolio
 
 import logging
+import sys
 
 ### LOGGER #####################################################################
 logger = logging.getLogger()
