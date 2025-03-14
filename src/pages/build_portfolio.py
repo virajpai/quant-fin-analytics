@@ -6,6 +6,7 @@ import numpy as np
 
 from datetime import datetime
 from commons import portfolio
+from commons.nse_symbols import data
 
 import logging
 import sys
@@ -45,7 +46,7 @@ def print_tree(directory, prefix=""):
             new_prefix = prefix + ("    " if is_last else "│   ")  # Adjust prefix
             print_tree(path, new_prefix)
 
-print_tree(os.getcwd())
+# print_tree(os.getcwd())
 
 ################################################################################
 
@@ -57,7 +58,7 @@ TICKERS_CSV_URL = 'pages/EQUITY_L.csv' # "static/data/EQUITY_L.csv"
 def load_tickers():
     # Load tickers from CSV (columns: ticker, name, exchange)
     try:
-        df = pd.read_csv(TICKERS_CSV_URL)
+        df = pd.DataFrame(data) # pd.read_csv(TICKERS_CSV_URL)
         return df[['SYMBOL', 'NAME OF COMPANY']].values.tolist()  # Format: [[TICKER.NS, Name], ...]
     except Exception as e:
         logger.error(e)
