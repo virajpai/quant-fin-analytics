@@ -9,6 +9,7 @@ from commons import portfolio
 
 import logging
 import sys
+import os
 
 ### LOGGER #####################################################################
 logger = logging.getLogger()
@@ -26,6 +27,7 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 logger.addHandler(stdout_handler)
+logger.info(f'CWD: {os.getcwd()}')
 ################################################################################
 
 # Load a curated list of Indian stock tickers (NSE/BSE)
@@ -85,7 +87,7 @@ selected_ticker_label = st.selectbox(
     help="Type to search for stocks (e.g., 'Reliance', 'HDFC')",
     key= "selected_option"
 )
-logger.info('Selected Ticker Label: ', selected_ticker_label)
+logger.info(f'Selected Ticker Label: {selected_ticker_label}')
 
 if not selected_ticker_label is None:
     # Extract the ticker from the selected label
