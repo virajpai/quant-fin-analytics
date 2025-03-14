@@ -7,6 +7,26 @@ import numpy as np
 from datetime import datetime
 from commons import portfolio
 
+import logging
+
+### LOGGER #####################################################################
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(message)s')
+
+stdout_handler = logging.StreamHandler(sys.stdout)
+stdout_handler.setLevel(logging.DEBUG)
+stdout_handler.setFormatter(formatter)
+
+file_handler = logging.FileHandler('logs.log')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+
+logger.addHandler(file_handler)
+logger.addHandler(stdout_handler)
+################################################################################
+
 # Load a curated list of Indian stock tickers (NSE/BSE)
 # Source: Predefined CSV (replace with your own URL or local file)
 TICKERS_CSV_URL = "static/data/EQUITY_L.csv"
@@ -42,7 +62,7 @@ def get_last_close_price(ticker):
         else:
             return None
     except:
-        print(e)
+        logger.error(e)
         return None
 
 def reset_selectbox():
@@ -64,7 +84,7 @@ selected_ticker_label = st.selectbox(
     help="Type to search for stocks (e.g., 'Reliance', 'HDFC')",
     key= "selected_option"
 )
-print('Selected Ticker Label: ', selected_ticker_label)
+logger.info('Selected Ticker Label: ', selected_ticker_label)
 
 if not selected_ticker_label is None:
     # Extract the ticker from the selected label
