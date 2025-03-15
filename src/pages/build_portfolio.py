@@ -97,14 +97,19 @@ def reset_selectbox():
     st.session_state.selected_option = "" 
 
 # Streamlit app
-st.title("📈 India Stock Portfolio Tracker (NSE/BSE)")
+LOGO = "/pages/FolioXLab.png"
+#st.logo(LOGO)
+st.header("FolioXLab", divider=True)
+# st.image(LOGO)
+# st.markdown(f"![FoiliXLab]({LOGO}) FolioXLab", unsafe_allow_html=False)
+st.caption("**_:violet[Experiment], :green[Optimize] & :blue[Invest]_ 🚀📊🧪**")
 
 # Load tickers and create searchable dropdown
 tickers_list = load_tickers()
 ticker_options = {ticker: f"{name} ({ticker})" for ticker, name in tickers_list}
 
 # Searchable dropdown in the main interface
-st.header("Add Stocks to Portfolio")
+st.subheader("Add Stocks to Portfolio")
 selected_ticker_label = st.selectbox(
     "Search for a stock:",
     options=list(ticker_options.values()),
@@ -143,7 +148,7 @@ if not selected_ticker_label is None:
 
 
 # Display and manage portfolio
-st.header("Your Portfolio")
+st.subheader("Your Portfolio")
 if st.session_state.portfolio:
     # Create DataFrame
     portfolio_df = pd.DataFrame(st.session_state.portfolio)
@@ -205,7 +210,8 @@ if st.session_state.portfolio:
 
     # Calculate total portfolio value
     total_value = portfolio_df["Value"].sum()
-    st.subheader(f"Total Portfolio Value: :green[₹{total_value:,.2f}]")
+    st.subheader(f"Total Portfolio Value: :green[₹{total_value:,.2f}]", 
+                    help="Your portfolio valuation is based on the last closing prices of the selected stocks.")
 
     ### Simulate Portfolio
     if st.button("Simulate Portfolio"):
@@ -249,7 +255,23 @@ if st.session_state.portfolio:
         # Display Simulation Chart
         sim_df.index = formatted_index
 
-        st.pyplot(portfolio.plot_mc_gbm(sim_df))
+        st.pyplot(portfolio.plot_mc_gbm(sim_df, num_lines=70))
+
+        # on = st.toggle("Need Help on Portfolio Simulation?")
+
+        with st.expander("Need Help?"):
+            st.markdown("""
+                <small>
+                The simulation uses Monte Carlo-based Geometric Brownian Motion (GBM) to model possible future portfolio values, considering stock correlations. Based on 10,000 simulations, we estimate:
+                <ul>
+                <li>Expected Outcome (Median): The most likely portfolio value.
+                <li>Worst Case (5th Percentile): A conservative estimate where only 5% of scenarios perform worse.
+                <li>Best Case (95th Percentile): An optimistic estimate where 95% of scenarios perform worse.
+                </ul>
+                </small>
+                """,
+                unsafe_allow_html=True
+            )
 
 else:
     st.info("No stocks in your portfolio. Add stocks above.")

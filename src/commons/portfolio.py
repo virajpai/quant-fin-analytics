@@ -55,7 +55,7 @@ def simulate_portfolio(stocks, stock_qty, hist_years=3, T=4*3, dt=30*3, n_sim=10
     paths[0, :, :] = S0.reshape(-1, 1)
 
     # Simulate correlated GBM paths
-    np.random.seed(42)
+    # np.random.seed(42)
     for t in range(1, T):
         Z = np.random.randn(num_stocks, n_sim)  # Independent normal variables
         Z_corr = L @ Z  # Apply correlation
